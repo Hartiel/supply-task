@@ -11,7 +11,6 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Mock do Inertia para os testes
-        Inertia::fake();
+        Inertia::share('errors', []);
     }
 }

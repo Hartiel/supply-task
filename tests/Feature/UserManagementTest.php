@@ -24,10 +24,13 @@ test('admin pode listar usuários', function () {
     $admin = User::factory()->create(['role' => UserRole::ADMIN]);
     User::factory()->count(3)->create();
 
-    $this->actingAs($admin)
-        ->get(route('users.index'))
-        ->assertStatus(200)
-        ->assertSee($admin->name);
+    $response = $this->actingAs($admin)
+        ->get(route('users.index'));
+    $response->assertStatus(200);
+    $response->assertViewHas('page');
+
+    $pageData = $response->viewData('page');
+    expect($pageData['component'])->toBe('Users/Index');
 });
 
 test('admin pode criar um novo vendedor válido', function () {
@@ -42,11 +45,15 @@ test('admin pode criar um novo vendedor válido', function () {
         'status' => UserStatus::ACTIVE->value,
     ];
 
-    $this->actingAs($admin)
-        ->post(route('users.store'), $userData)
-        ->assertRedirect(route('users.index'));
+    $response = $this->actingAs($admin)
+        ->post(route('users.store'), $userData);
 
-    $this->assertDatabaseHas('users', ['email' => 'vendedor@teste.com']);
+    $response->assertRedirect(route('users.index'));
+    
+    $this->assertDatabaseHas('users', [
+        'email' => 'vendedor@teste.com',
+        'role' => UserRole::SELLER->value
+    ]);
 });
 
 test('não permite criar usuário com e-mail duplicado', function () {
