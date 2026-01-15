@@ -10,6 +10,14 @@ Desafio técnico para gestão de fornecedores, produtos e pedidos. Desenvolvido 
 - **Infraestrutura:** Docker (Laravel Sail)
 - **Ferramentas de Teste:** Mailpit (E-mail)
 
+## 🏗️ Padrões de Projeto
+###Para garantir a manutenibilidade e testabilidade, implementei:
+- **Repository Pattern:** Desacoplamento da camada de persistência.
+- **Service Layer:** Centralização da lógica de negócio e regras de domínio.
+- **Strict Typing:** Tipagem forte em todos os métodos para evitar erros em tempo de execução.
+- **Role-Based Access Control:** Middleware customizado para gestão de permissões (Admin e Vendedor).
+- **Enum Casts:** Garantia de integridade de dados para Status e Perfis de usuário.
+
 ## 🚀 Como Rodar o Projeto
 
 1. **Clone o repositório:**
@@ -36,4 +44,24 @@ Desafio técnico para gestão de fornecedores, produtos e pedidos. Desenvolvido 
    ./vendor/bin/sail artisan migrate
    ./vendor/bin/sail npm install
    ./vendor/bin/sail npm run build
+   ```
+
+4. **🔑 Acesso ao Sistema (IMPORTANTE)**
+
+   Para o primeiro acesso, é obrigatório rodar o seeder, que criará a estrutura de perfis e o usuário administrador inicial:
+   
+   ```bash
+   ./vendor/bin/sail artisan db:seed
+   ```
+
+   Credenciais do Admin:
+   E-mail: admin@admin.com
+   Senha: password
+
+## 🧪 Testes
+
+O projeto utiliza Pest PHP para testes de Feature e Unitários. Para rodar a suíte de testes:
+
+   ```bash
+   ./vendor/bin/sail pest
    ```
