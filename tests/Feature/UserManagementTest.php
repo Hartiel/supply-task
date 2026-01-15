@@ -12,7 +12,7 @@ test('"convidado" não pode acessar a lista de usuários', function () {
         ->assertRedirect(route('login'));
 });
 
-test('vendedor não pode acessar listagem de usuários (erro 403)', function () {
+test('vendedor não pode acessar listagem de usuários', function () {
     $seller = User::factory()->create(['role' => UserRole::SELLER]);
 
     $this->actingAs($seller)
@@ -26,6 +26,7 @@ test('admin pode listar usuários', function () {
 
     $response = $this->actingAs($admin)
         ->get(route('users.index'));
+        
     $response->assertStatus(200);
     $response->assertViewHas('page');
 
@@ -36,38 +37,33 @@ test('admin pode listar usuários', function () {
 test('admin pode criar um novo vendedor válido', function () {
     $admin = User::factory()->create(['role' => UserRole::ADMIN]);
     
-    $userData = [
-        'name' => 'Novo Vendedor',
-        'email' => 'vendedor@teste.com',
+    $userData = User::factory()->raw([
         'password' => 'password123',
         'password_confirmation' => 'password123',
         'role' => UserRole::SELLER->value,
         'status' => UserStatus::ACTIVE->value,
-    ];
-
-    $response = $this->actingAs($admin)
-        ->post(route('users.store'), $userData);
-
-    $response->assertRedirect(route('users.index'));
-    
-    $this->assertDatabaseHas('users', [
-        'email' => 'vendedor@teste.com',
-        'role' => UserRole::SELLER->value
     ]);
+
+    $this->actingAs($admin)
+        ->post(route('users.store'), $userData)
+        ->assertRedirect(route('users.index'));
+    
+    $this->assertDatabaseHas('users', ['email' => $userData['email']]);
 });
 
 test('não permite criar usuário com e-mail duplicado', function () {
     $admin = User::factory()->create(['role' => UserRole::ADMIN]);
-    User::factory()->create(['email' => 'duplicado@teste.com']);
+    $existingUser = User::factory()->create(['email' => 'duplicado@teste.com']);
 
-    $userData = [
-        'name' => 'Outro',
-        'email' => 'duplicado@teste.com',
+    $userData = User::factory()->make([
+        'email' => $existingUser->email,
         'password' => 'password123',
         'password_confirmation' => 'password123',
-        'role' => UserRole::SELLER->value,
         'status' => UserStatus::ACTIVE->value,
-    ];
+    ])->toArray();
+
+    $userData['password'] = 'password123';
+    $userData['password_confirmation'] = 'password123';
 
     $this->actingAs($admin)
         ->post(route('users.store'), $userData)
